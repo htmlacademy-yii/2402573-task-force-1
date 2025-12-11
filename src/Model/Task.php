@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace TaskForce\Model;
 
+use TaskForce\Action\AbstractAction;
 use TaskForce\Enum\Status;
-use TaskForce\Enum\Action;
+use TaskForce\Action\Cancel;
+use TaskForce\Action\Complete;
+use TaskForce\Action\Decline;
+use TaskForce\Action\Respond;
 
 class Task
 {
@@ -39,34 +43,23 @@ class Task
     /**
      * Возвращает массив всех действий
      *
-     * @return Action[]
+     * @return AbstractAction[]
      */
     public function getAllActions(): array
     {
-        return Action::cases();
+        return [new Cancel(), new Respond(), new Complete(), new Decline()];
     }
 
     /**
-     * Возвращает следующий доступный статус
+     * Возвращает следующий статус для данного действия
      *
-     * @param Action $action действие с заданием
+     * @param AbstractAction $action действие с заданием
      *
      * @return Status|null доступный статус или null если его нет
      */
-    public function getNextStatus(Action $action): ?Status
+    public function getNextStatus(AbstractAction $action): ?Status
     {
-        switch ($action) {
-            case Action::CANCEL:
-                return Status::CANCELED;
-            case Action::RESPOND:
-                return Status::INPROGRESS;
-            case Action::COMPLETE:
-                return Status::COMPLETED;
-            case Action::DECLINE:
-                return Status::FAILED;
-            default:
-                return null;
-        }
+        return $action->getNextStatus();
     }
 
     /**
@@ -74,18 +67,22 @@ class Task
      *
      * @param Status $status статус задания
      *
-     * @return Action[] массив доступных действий
+     * @return AbstractAction[] массив доступных действий
      */
-    public function getAvailableAction(Status $status): array
+    public function getAvailableAction(Status $status, int $userId): array
     {
         switch ($status) {
             case Status::NEW:
-                return [Action::CANCEL, Action::RESPOND];
+                $actions = [new Cancel(), new Respond()];
+                break;
             case Status::INPROGRESS:
-                return [Action::COMPLETE, Action::DECLINE];
+                $actions = [new Complete(), new Decline()];
+                break;
             default:
-                return [];
+                $actions = [];
         }
+
+        return array_filter($actions, fn($action) => $action->checkRights($userId, $this->workerId, $this->clientId));
     }
     /**
      * Получение текущего статуса
