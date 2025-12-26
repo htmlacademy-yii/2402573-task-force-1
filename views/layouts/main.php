@@ -26,10 +26,14 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 <body class="d-flex flex-column h-100">
 <?php $this->beginBody() ?>
 <header class="page-header">
+  <?php if (Yii::$app->controller->route == ('sign-up/index')): ?>
     <nav class="main-nav">
         <a href='#' class="header-logo">
             <img class="logo-image" src="img/logotype.png" width=227 height=60 alt="taskforce">
         </a>
+    </nav>
+<?php else: ?>
+  <nav class="main-nav">
         <div class="nav-wrapper">
             <ul class="nav-list">
                 <li class="list-item list-item--active">
@@ -47,7 +51,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             </ul>
         </div>
     </nav>
-    <div class="user-block">
+     <div class="user-block">
         <a href="#">
             <img class="user-photo" src="img/man-glasses.png" width="55" height="55" alt="Аватар">
         </a>
@@ -69,7 +73,9 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
             </div>
         </div>
     </div>
+<?php  endif ?>
 </header>
+ 
 <main class="main-content container">
     <div class="main-container">
         <?= $content ?>
